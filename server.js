@@ -17,20 +17,9 @@ const db = low(adapter)
 db.defaults({ bows: [], 
              users: []
   }).write();
-
-
-var users = {};
-var god_data = {
-  msglocation: "826381252340351016",
-  msg: "",
-  typing: false,
-  users: users
-};
-var curr_channel = "cupid-4-u";
-var magic_symbol = "|";
+var cupid = new Cupid(db);
 
 // configuration ===========================================
-var cupid = new Cupid(db);
 
 var port = process.env.PORT || 8080; // set our port
 
@@ -48,7 +37,7 @@ app.use(
 app.use(methodOverride("X-HTTP-Method-Override")); // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
 
 app.use(express.static(__dirname + "/public")); // set the static files location /public/img will be /img for users
-require("./routes")(app, cupid, god_data); // pass our application into our routes
+require("./routes")(app, cupid); // pass our application into our routes
 
 // start app ===============================================
 app.listen(port);

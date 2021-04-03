@@ -22,6 +22,7 @@ function nuke_users(){
       type: "DELETE",
       success: function(result) {
         console.log(result);
+        window.localStorage.clear();
       }
     });
 }

@@ -1,6 +1,7 @@
 // vars ===========================================
 const Bow = require("./schema/Bow");
 const User = require("./schema/User");
+const Letter = require("./schema/Letter");
 const Eris = require("eris");
 const needle = require("needle");
 
@@ -157,29 +158,28 @@ class Cupid {
 
     bot.connect(); // Get the bot to connect to Discord
   }
-  new_user(pseudonym) {
-    var new_user = new User(pseudonym);
-    var result_user = this.db
-      .get("users")
-      .push(new_user)
-      .write();
-    return result_user[0];
+  receive_letter(pseudonym,letter){
+    var user = new User(pseudonym);
+    user.init();
+    var letter = new Letter(user.id,letter);    
+    user.add_letter(letter);
+    return {user:user,letter:letter};
   }
-  update_user(uuid, token) {
-    var user = this.db
-      .get("users")
-      .find({ uuid: uuid })
-      .value();
-    if (user == null) return;
+  
+  init_user(uuid, code) {
+    var user = User.find(uuid);
+    if (user == null) {
+      console.log("No user to init. Error...");
+    }
 
-    var result_user = this.db
-      .get("users")
-      .find({ uuid: uuid })
-      .assign({ token: token })
-      .write();
-    return result_user;
+    this.exchange_code(code,(body) => {
+      user.add_token(body.access_token)
+      this.add_user_id(user.uuid);
+    });
+    return user;
   }
-  send_letter_to_mods(author, letter_txt) {
+  
+  send_letter_to_mods(author, letter) {
     //distribute it to a bow
     var query_bows = this.db.get("bows").value();
     if (query_bows.length == 0) {
@@ -196,7 +196,9 @@ class Cupid {
       this.bot.createMessage(bow.channel.id, author + " says:\n" + letter);
     }
   }
-  exchange_code(code) {
+  
+  // warning! async functions below =================================
+  exchange_code(code,callback_fn) {
     var data = {
       client_id: process.env.client_id,
       client_secret: process.env.client_secret,
@@ -210,16 +212,37 @@ class Cupid {
         "Content-Type": "application/x-www-form-urlencoded"
       }
     };
-    needle.get(
+    needle.post(
       process.env.api_endpoint + "/oauth2/token",
       data,
       options,
       function(error, response) {
         if (!error && response.statusCode == 200) {
-          console.log(response.body);
-          return response.body;
+          callback_fn(response.body);
         } else {
-          console.log(error);
+          console.log(response.body);
+        }
+      }
+    );
+  }
+  
+  add_user_id(uuid){
+    
+    var user = User.find(uuid);
+    var options = {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer "+user.token
+      }
+    };
+    needle.get(
+      process.env.api_endpoint + "/user/@me",
+      options,
+      function(error, response) {
+        if (!error && response.statusCode == 200) {
+          user.add_id(response.body.user.id);
+        } else {
+          console.log(response.body);
         }
       }
     );

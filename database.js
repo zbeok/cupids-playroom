@@ -1,11 +1,9 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-const Bow = require("./schema/Bow");
-const User = require("./schema/User");
-const Letter = require("./schema/Letter");
 
 class DataBase {
-  constructor (author,text) {
+  
+  constructor () {
     const adapter = new FileSync('.data/db.json')
     this._db = low(adapter)
     this._db.defaults({ bows: [], 
@@ -15,14 +13,17 @@ class DataBase {
   }
   
   new(category,data) {
-    var item = this.db
+    var item = this._db
       .get(category)
       .push(data)
       .write();
+    if (item==null)
+      return  null;
     return item[0];   
   }
+  
   get(category,data) {
-    var item = this.db
+    var item = this._db
       .get(category)
       .find(data)
       .value();
@@ -30,7 +31,7 @@ class DataBase {
   }
   
   update(category,criteria,data) {
-    var item = this.db
+    var item = this._db
       .get(category)
       .find(criteria)
       .assign(data)
@@ -39,21 +40,21 @@ class DataBase {
   }
   
   delete(category,criteria) {
-    var item = db.get('posts')
+    var item = this._db.get('posts')
     .remove(criteria)
     .write()
   }
   
   nuke_users() {
     console.log("User data cleared")
-    db.get('users')
+    this._db.get('users')
     .remove()
     .write()
   }
   
   nuke_bows() {
     console.log("User data cleared")
-    db.get('bows')
+    this._db.get('bows')
     .remove()
     .write()
   }
@@ -64,4 +65,4 @@ class DataBase {
   }
 }
 
-module.exports = Database;
+module.exports = DataBase;
