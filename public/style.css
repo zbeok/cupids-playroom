@@ -38,6 +38,11 @@ input{
   text-align:center;
   font-family:"Times New Roman", serif;
 }
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: white;
+  opacity: .1; /* Firefox */
+}
 g {
   margin:0;padding:0;
   color:#ff00ff;
@@ -53,9 +58,9 @@ p {
 h1 {
   margin:0;padding:0;
   color:#ffaaff;
-  opacity:0;
+/*   opacity:0; */
   text-decoration:bold;
-  font-size:100px;
+  font-size:8vmax;
 }
 
 
@@ -116,14 +121,11 @@ word-break: break-all;
 }
 #title{
   position:absolute;
-  background-image:url('https://cdn.glitch.com/10d4c252-4224-4431-b43b-176c2b3ac571%2FcGjU.gif?v=1588804224424');
-  background-size:contain;
-  background-repeat: no-repeat;
-  background-position:center bottom;
   width:100vw;
   height:80px;
-  left:0;
-  margin-top:-85px;
+  left:10vw;
+  margin-top:-9vmax;
+  padding:0;
   z-index:100;
 }
 #title:hover{
@@ -185,6 +187,7 @@ word-break: break-all;
 #candle{
   height:200px;
   right:10vw;
+  z-index:-1;
   bottom:20vh;
 } 
 

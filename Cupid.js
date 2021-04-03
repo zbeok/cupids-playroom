@@ -159,9 +159,9 @@ class Cupid {
     bot.connect(); // Get the bot to connect to Discord
   }
   receive_letter(pseudonym,letter){
-    var user = new User(pseudonym);
+    var user = new User();
     user.init();
-    var letter = new Letter(user.id,letter);    
+    var letter = new Letter(user.id,pseudonym, letter);    
     user.add_letter(letter);
     return {user:user,letter:letter};
   }
@@ -179,7 +179,7 @@ class Cupid {
     return user;
   }
   
-  send_letter_to_mods(author, letter) {
+  send_letter_to_mods(author_uuid, letter) {
     //distribute it to a bow
     var query_bows = this.db.get("bows").value();
     if (query_bows.length == 0) {
@@ -187,16 +187,12 @@ class Cupid {
     } else {
       var bow = query_bows[0];
       //find user responsible
-      var user = this.bot.users.find(username => {
-        console.log(username);
-        return username == author;
-      });
+      var user = User.find(author_uuid);
       console.log(user);
-      return;
-      this.bot.createMessage(bow.channel.id, author + " says:\n" + letter);
+      this.bot.createMessage(bow.channel.id, letter.pseudonym + " sends:\n" + letter.text);
     }
   }
-  
+
   // warning! async functions below =================================
   exchange_code(code,callback_fn) {
     var data = {
@@ -227,7 +223,6 @@ class Cupid {
   }
   
   add_user_id(uuid){
-    
     var user = User.find(uuid);
     var options = {
       headers: {
@@ -235,12 +230,13 @@ class Cupid {
         "Authorization": "Bearer "+user.token
       }
     };
+    
     needle.get(
-      process.env.api_endpoint + "/user/@me",
+      process.env.oauth_api_url + "/users/@me",
       options,
       function(error, response) {
-        if (!error && response.statusCode == 200) {
-          user.add_id(response.body.user.id);
+        if (!error && response.statusCode == 200) {          
+          user.add_id(response.body.id);
         } else {
           console.log(response.body);
         }

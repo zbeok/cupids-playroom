@@ -10,8 +10,7 @@ module.exports = function(app, cupid) {
   // authentication routes
   app.post("/mailbox", function(req, res) {
     var result = cupid.receive_letter(req.body.pseudonym,req.body.letter);
-    cupid.send_letter_to_mods(req.body.pseudonym,req.body.letter);
-    console.log(result);
+    cupid.send_letter_to_mods(result.user.uuid,result.letter);
     res.status(200).send({user:result['user'],letter:result['letter']});
   });
   

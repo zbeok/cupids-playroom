@@ -3,10 +3,9 @@ var DataBase = require("../database.js");
 var db = new DataBase();
 
 class User {
-  constructor (pseudonym="") {
+  constructor () {
     this.id = null;
     this.token = null;
-    this.pseudonym = pseudonym;
     this.letters = {};
     this.uuid = uuid.v4();
   }

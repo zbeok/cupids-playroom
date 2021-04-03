@@ -50,7 +50,6 @@ function check_token() {
         console.log(result);
       }
     });
-  }
-  console.log("letter sent to cupid!")
+  } 
 }
 check_token();

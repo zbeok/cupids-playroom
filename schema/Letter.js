@@ -1,9 +1,10 @@
 var uuid = require("uuid");
 
 class Letter {
-  constructor (author,text) {
+  constructor (author,pseudonym,text) {
     this.author = author;
     this.text = text;
+    this.pseudonym = pseudonym;
     this.recipient = null;
     this.approved = false;
     this.uuid = uuid.v4();
