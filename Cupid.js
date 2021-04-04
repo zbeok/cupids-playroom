@@ -158,10 +158,12 @@ class Cupid {
 
     bot.connect(); // Get the bot to connect to Discord
   }
+  
   receive_letter(pseudonym,letter){
     var user = new User();
     user.init();
-    var letter = new Letter(user.id,pseudonym, letter);    
+    var letter = new Letter(user.uuid, pseudonym, letter);    
+    letter.init();
     user.add_letter(letter);
     return {user:user,letter:letter};
   }
@@ -188,12 +190,30 @@ class Cupid {
       var bow = query_bows[0];
       //find user responsible
       var user = User.find(author_uuid);
-      console.log(user);
       this.bot.createMessage(bow.channel.id, letter.pseudonym + " sends:\n" + letter.text);
     }
   }
+  resolve_letter(bow,letter,approve) {
+    if (approve) {
+      var recipient = User.random();
+      letter.approve();
+      letter.to(recipient);
+    } else {
+      var author = User.find(letter.author_uuid);
+      this.dm(author,"the cupids have deemed your letter unfit for their standards, and urge you to try again. sorry :(")
+    }
+    bow.remove_letter(letter);
+  }
 
   // warning! async functions below =================================
+  
+  dm(user,text) {
+    this.bot.getDMChannel(user.id).then( channel => {
+      console.log(channel.id);
+      this.bot.createMessage(channel.id, text);
+    })
+  }
+  
   exchange_code(code,callback_fn) {
     var data = {
       client_id: process.env.client_id,
@@ -223,6 +243,7 @@ class Cupid {
   }
   
   add_user_id(uuid){
+    var cupid = this;
     var user = User.find(uuid);
     var options = {
       headers: {
@@ -237,6 +258,8 @@ class Cupid {
       function(error, response) {
         if (!error && response.statusCode == 200) {          
           user.add_id(response.body.id);
+          cupid.dm(user,"please wait! cupids are processing your request now ^_^");
+          return response.body.id;
         } else {
           console.log(response.body);
         }

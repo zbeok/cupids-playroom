@@ -25,9 +25,18 @@ class User {
     
     return user;
   }
+  static random() {    
+    var users = db.get('users').value();
+    if (users==null) {
+      return null;
+    }
+    
+    const i = Math.floor(Math.random() * db.size());
+    return user[i];
+  }
   
   add_letter(letter){
-    this.letters[letter.uuid] = letter;
+    this.letters[letter.uuid] = letter.text;
     this.save();
   }
   add_token(token) {

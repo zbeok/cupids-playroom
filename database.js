@@ -1,36 +1,31 @@
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
+const low = require("lowdb");
+const FileSync = require("lowdb/adapters/FileSync");
 
 class DataBase {
-  
-  constructor () {
-    const adapter = new FileSync('.data/db.json')
-    this._db = low(adapter)
-    this._db.defaults({ bows: [], 
-                 users: []
-      }).write();
-    
+  constructor() {
+    const adapter = new FileSync(".data/db.json");
+    this._db = low(adapter);
+    this._db.defaults({ bows: [], users: [], letters: [] }).write();
   }
-  
-  new(category,data) {
+
+  new(category, data) {
     var item = this._db
       .get(category)
       .push(data)
       .write();
-    if (item==null)
-      return  null;
-    return item[0];   
+    if (item == null) return null;
+    return item[0];
   }
-  
-  get(category,data) {
+
+  get(category, data) {
     var item = this._db
       .get(category)
       .find(data)
       .value();
-    return item;   
+    return item;
   }
-  
-  update(category,criteria,data) {
+
+  update(category, criteria, data) {
     var item = this._db
       .get(category)
       .find(criteria)
@@ -38,27 +33,38 @@ class DataBase {
       .write();
     return item;
   }
-  
-  delete(category,criteria) {
-    var item = this._db.get('posts')
-    .remove(criteria)
-    .write()
+
+  delete(category, criteria) {
+    var item = this._db
+      .get(category)
+      .remove(criteria)
+      .write();
   }
   
+  size(category) {
+    
+    var length = this._db.get(category)
+      .size()
+      .value();
+    return length;
+  }
+
   nuke_users() {
-    console.log("User data cleared")
-    this._db.get('users')
-    .remove()
-    .write()
+    console.log("User data cleared");
+    this._db
+      .get("users")
+      .remove()
+      .write();
   }
-  
+
   nuke_bows() {
-    console.log("User data cleared")
-    this._db.get('bows')
-    .remove()
-    .write()
+    console.log("User data cleared");
+    this._db
+      .get("bows")
+      .remove()
+      .write();
   }
-  
+
   nuke() {
     this.nuke_users();
     this.nuke_bows();
