@@ -2,26 +2,34 @@ var DataBase = require("../database.js");
 var db = new DataBase();
 
 class Bow {
-  constructor(msg) {
-    this.guild = msg.guildID
+  constructor(msg=null) {
+    if (msg==null) {
+      return;
+    }
+    this.guild = msg.guildID;
     this.channel = msg.channel;
     this.host = msg.author;
     this.delimiter = "|";
-    this.letters = {};
+    this.queue = [];
     this.limit = 30;
   }
   
   add_letter(letter){
-    if (this.letters.length>this.limit){
-      console.log("TODO: make a limit. bows need to distribute letters evenly");
+    if (letter==null) {
+      console.log("ERROR tf");
+      return;
     }
-    this.letters.push(letter.uuid);
+    if (this.queue.length>this.limit){
+      console.log("TODO: make a limit. bows need to distribute letters evenly");
+      console.log(this.queue);
+    }
+    this.queue.push(letter.uuid);
     this.save();
   }
   
   remove_letter(letter) {
-    var i = this.letters.indexOf(letter.uuid);
-    this.letters.splice(0,i);
+    var i = this.queue.indexOf(letter.uuid);
+    this.queue.splice(0,i);
     this.save();
   }
   
@@ -41,11 +49,11 @@ class Bow {
   
   //TODO make an actual random finder
   static random() {
-    var bow = db.get('bows').value();
-    if (bow==null) {
+    var bows = db.all('bows');
+    if (bows.length==0) {
       return null;
     }
-    bow = Bow.reconstruct(bow[0]);
+    var bow = Bow.reconstruct(bows[0]);
     return bow;
   }
   
@@ -65,6 +73,15 @@ class Bow {
     var item = db.delete('bows',{guild:this.guild});
     item = Bow.reconstruct(this);
     return item;
+  }
+  
+  static all() {
+    var bows = db.all('bows');
+    return bows;
+  }
+  
+  static nuke() {
+    db.nuke('bows');
   }
   
 }

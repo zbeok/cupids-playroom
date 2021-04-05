@@ -8,10 +8,12 @@ function sendmsg() {
     return;
     
   }
+  var uuid = storage.getItem('user');
   const url = "/mailbox";
   var data = {
     "pseudonym":pseudonym,
-    "letter":letter
+    "letter":letter,
+    "uuid":uuid
   }
   
   $.ajax({

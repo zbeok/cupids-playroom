@@ -1,16 +1,11 @@
-const User = require('./schema/User');
-const Letter = require('./schema/Letter');
-
 module.exports = function(app, cupid) {
   var bot = cupid.bot;
-  var db = cupid.db;
   
   // server routes ===========================================================
   // handle things like api calls
   // authentication routes
   app.post("/mailbox", function(req, res) {
-    var result = cupid.receive_letter(req.body.pseudonym,req.body.letter);
-    cupid.send_letter_to_mods(result.user.uuid,result.letter);
+    var result = cupid.receive_letter(req.body.pseudonym,req.body.letter,req.body.uuid);
     res.status(200).send({user:result['user'],letter:result['letter']});
   });
   
@@ -21,14 +16,35 @@ module.exports = function(app, cupid) {
     res.status(200).send(user.code);
   });
   
+  app.get("/all", function(req, res) {
+    
+    res.status(200).send(cupid.dump_db());
+  });
+  
+  app.get("/letters", function(req, res) {
+    // var uuid =  req.body.uuid;
+    // var code = req.body.code;    
+    // var user = cupid.init_user(uuid,code);
+    res.status(200).send("TODO");
+  });
   
   app.delete("/clear/users", function(req, res) {
     // removes all entries from the collection
     console.log("User data cleared")
-    db.get('users')
-    .remove()
-    .write()
+    cupid.nuke_users();
     res.send("User data cleared");
+  });
+  app.delete("/clear/bows", function(req, res) {
+    // removes all entries from the collection
+    console.log("Bow data cleared")
+    cupid.nuke_bows();
+    res.send("Bow data cleared");
+  });
+  
+  app.delete("/clear/all", function(req, res) {
+    // removes all entries from the collection
+    cupid.nuke();
+    res.send("all data cleared");
   });
   
   var options = { root: "." };

@@ -6,18 +6,11 @@ var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
 const Eris = require("eris");
 const Cupid = require("./Cupid");
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
 
 // vars ====================================================
 
-const adapter = new FileSync('.data/db.json')
-const db = low(adapter)
-// default user list
-db.defaults({ bows: [], 
-             users: []
-  }).write();
-var cupid = new Cupid(db);
+
+var cupid = new Cupid();
 
 // configuration ===========================================
 

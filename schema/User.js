@@ -5,8 +5,10 @@ var db = new DataBase();
 class User {
   constructor () {
     this.id = null;
+    this.username = null;
     this.token = null;
     this.letters = {};
+    this.deliveries = {};
     this.uuid = uuid.v4();
   }
   
@@ -16,17 +18,27 @@ class User {
   }
   
   static find(uuid) {
+    if (uuid==null) {
+      return null;
+    }
     var user = db.get('users',{uuid:uuid});
     if (user==null) {
       return null;
     }
-    
     user = User.reconstruct(user);
-    
     return user;
   }
+  static find_id(id) {
+    var user = db.get('users',{id:id});
+    if (user==null) {
+      return null;
+    }
+    user = User.reconstruct(user);
+    return user;
+  }
+  
   static random() {    
-    var users = db.get('users').value();
+    var users = db.all('users');
     if (users==null) {
       return null;
     }
@@ -35,13 +47,29 @@ class User {
     return user[i];
   }
   
+  add_delivery(letter){
+    this.delivery[letter.uuid] = letter.text;
+    this.save();
+  }
+  
   add_letter(letter){
     this.letters[letter.uuid] = letter.text;
     this.save();
   }
+  
+  delete_delivery(letter){
+    this.deliveries.delete(letter.uuid);
+    this.save();
+  }
+  
+  delete_letter(letter){
+    this.letters.delete(letter.uuid);
+    this.save();
+  }
+  
   add_token(token) {
     this.token = token;
-    var item = this.save();
+    this.save();
   }
   
   add_id(id) {
@@ -49,7 +77,15 @@ class User {
       return null;
     }
     this.id = id;
-    var item = this.save();
+    this.save();
+  }
+  
+  add_username(username) {
+    if (this.username!=null) {
+      return null;
+    }
+    this.username = username;
+    this.save();
   }
   
   init(){
@@ -57,7 +93,6 @@ class User {
     new_user = User.reconstruct(this);
     return new_user;
   }
-  
   
   save(){
     var item = db.update('users',{uuid:this.uuid},this);
@@ -69,6 +104,15 @@ class User {
     var item = db.delete('users',{uuid:this.uuid});
     item = User.reconstruct(this);
     return item;
+  }
+  
+  static all() {
+    var users = db.all('users');
+    return users;
+  }
+  
+  static nuke() {
+    db.nuke('users');
   }
   
 }

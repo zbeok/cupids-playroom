@@ -3,11 +3,14 @@ const FileSync = require("lowdb/adapters/FileSync");
 
 class DataBase {
   constructor() {
-    const adapter = new FileSync(".data/db.json");
+    const adapter = new FileSync(".data/db.json",{
+      defaultValue: { bows: [], users: [], letters: [] }
+    });
     this._db = low(adapter);
-    this._db.defaults({ bows: [], users: [], letters: [] }).write();
+    // this._db.defaults().write();
+    this._db.read();
   }
-
+  
   new(category, data) {
     var item = this._db
       .get(category)
@@ -24,8 +27,28 @@ class DataBase {
       .value();
     return item;
   }
+  
+  get_all(category, data) {
+    var items = this._db
+      .get(category)
+      .filter(data)
+      .value();
+    return items;
+  }
+  
+  all(category=null) {
+    if (category==null) {
+      var db_state = this._db.getState().value();
+      return db_state;
+    }
+    var list = this._db
+      .get(category)
+      .value();
+    return list;
+  }
 
   update(category, criteria, data) {
+    this._db.read();
     var item = this._db
       .get(category)
       .find(criteria)
@@ -35,6 +58,7 @@ class DataBase {
   }
 
   delete(category, criteria) {
+    this._db.read();
     var item = this._db
       .get(category)
       .remove(criteria)
@@ -42,32 +66,19 @@ class DataBase {
   }
   
   size(category) {
-    
     var length = this._db.get(category)
       .size()
       .value();
     return length;
   }
-
-  nuke_users() {
-    console.log("User data cleared");
+  
+  nuke(category) {
+    console.log(category+" data cleared");
+    this._db.read();
     this._db
-      .get("users")
+      .get(category)
       .remove()
       .write();
-  }
-
-  nuke_bows() {
-    console.log("User data cleared");
-    this._db
-      .get("bows")
-      .remove()
-      .write();
-  }
-
-  nuke() {
-    this.nuke_users();
-    this.nuke_bows();
   }
 }
 
