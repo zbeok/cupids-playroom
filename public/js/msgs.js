@@ -9,7 +9,6 @@ function sendmsg() {
     
   }
   var uuid = storage.getItem('user');
-  const url = "/mailbox";
   var data = {
     "pseudonym":pseudonym,
     "letter":letter,
@@ -17,17 +16,21 @@ function sendmsg() {
   }
   
   $.ajax({
-    url: "/mailbox",
+    url: "/api/mailbox",
     type: "POST",
     data:data,
     success: function(result) {
-      console.log("letter on its way to cupid!")
+      alert("letter on its way to cupid! <3");
       var uuid = storage.getItem('user');
       storage.setItem('user', result.user.uuid);
       storage.setItem('letter', result.letter.uuid);
       if (uuid==null) {
         window.location.replace("https://discord.com/api/oauth2/authorize?client_id=827426423878189066&redirect_uri=https%3A%2F%2Fcupids-playroom.glitch.me%2F&response_type=code&scope=identify","_self")
       }
+    },
+    error:function(error){
+      alert(error.responseJSON['error']);
+      console.log(error.responseJSON['error']);
     }
   });
 }
@@ -39,7 +42,7 @@ function check_token() {
   var stored_code = storage.getItem('code');
   if (code!=null && stored_code == null) {
     $.ajax({
-      url: "/token",
+      url: "/api/token",
       type: "PUT",
       data:{
         uuid:uuid,
@@ -48,7 +51,6 @@ function check_token() {
       success: function(result) {
         console.log("token stored....")
         storage.setItem('code', code);
-        
         console.log(result);
       }
     });

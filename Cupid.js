@@ -1,9 +1,10 @@
-// vars ===========================================
+// modules =================================================
+const Eris = require("eris");
+const needle = require("needle");
 const Bow = require("./schema/Bow");
 const User = require("./schema/User");
 const Letter = require("./schema/Letter");
-const Eris = require("eris");
-const needle = require("needle");
+const flavor_text = require("./flavor_text");
 
 // CUPID ===========================================
 // highlevel class for overarching actions and bot stuff
@@ -11,6 +12,11 @@ class Cupid {
   constructor() {
     const bot = new Eris(process.env.DISCORD_BOT_TOKEN); // Replace DISCORD_BOT_TOKEN in .env with your bot accounts token
     this.bot = bot;
+    this.id = "cupidbot";
+    this.poll_interval = 20 * 1000;
+    this.letter_cap = 2;
+
+    // bot =========================================
 
     bot.on("ready", () => {
       // When the bot is ready
@@ -23,6 +29,29 @@ class Cupid {
       if (msg.author.bot) {
         return;
       }
+      // admin actions take precedence, so check this first.
+      if (msg.author.id == process.env.admin_id) {
+        if (msg.content == this.id + " nuke all") {
+          bot.createMessage(msg.channel.id, "nuking all bitchezzz");
+          this.nuke();
+          return;
+        } else if (msg.content == this.id + " nuke users") {
+          bot.createMessage(msg.channel.id, "nuking the users");
+          User.nuke();
+          return;
+        } else if (msg.content == this.id + " nuke bows") {
+          bot.createMessage(msg.channel.id, "nuking the bows");
+          Bow.nuke();
+          return;
+        } else if (msg.content == this.id + " nuke letters") {
+          bot.createMessage(msg.channel.id, "nuking the letters");
+          Letter.nuke();
+          return;
+        } else if (msg.content == this.id + " spill") {
+          bot.createMessage(msg.channel.id, this.dump_db(true));
+        }
+      }
+
       // this is a dm or group dm!
       if (msg.channel.type == 1 || msg.channel.type == 3) {
         var user = User.find_id(msg.author.id);
@@ -35,12 +64,48 @@ class Cupid {
           return;
         } else if (msg.content == "goodbye sweet angels") {
           this.unsubscribe(user);
+        } else if (msg.content == this.id + " help") {
+          this.dm(
+            user,
+            flavor_text['user_help']
+          );
+        } else if (msg.content == this.id + " letters") {
+          this.dm(
+            user,
+            "here are the letters you've been involved with so far:" +
+              this.print_letters(user)
+          );
+        } else if (msg.content.includes(this.id + " bye ")) {
+          var bits = msg.content.split(" ");
+          var nick = bits[2];
+          var letter = Letter.find_by_nicks(user, nick);
+          this.spurn(letter.author, letter.recipient);
+          this.dm(user, "i hope you meant it! said goodbye to " + nick + ".");
+        } else if (msg.content.includes(this.id + " delete ")) {
+          var bits = msg.content.split(" ");
+          var nick = bits[2];
+          var letter = Letter.find_by_nicks(user, nick);
+          this.spurn(letter.author, letter.recipient);
+          letter.delete();
+          this.dm(
+            user,
+            "hope you wrote that letter down, and had your talking all done!"
+          );
+        } else if (msg.content.includes("@")) {
+          var bits = msg.content.slice(1).split(" ");
+          var nick = bits[0];
+          var text = msg.content.slice(2 + nick.length);
+          var letter = Letter.find_by_nicks(user, nick);
+          var anon_uuid =
+            letter.author == user.uuid ? letter.recipient : letter.author;
+          var anon = User.find(anon_uuid);
+          this.dm(anon, text);
         }
-        // TODO: dm recipient?
+
         return;
       }
-      
-      //new bow!
+
+      //new bow if needed
       var bow = Bow.find(msg.guildID);
       if (bow == null) {
         console.log("mod action");
@@ -56,24 +121,37 @@ class Cupid {
             msg.channel.id,
             "hello i'm cupid! i noticed that i'm here but you didn't wake me up. try typing ||awaken, my love|| to begin!"
           );
-        }
+        } 
         return;
       }
 
       // moderator actions
       if (msg.channel.id != bow.channel.id) return;
-      // TODO add: approval process, queue check
-      if (msg.content == 'queue') {
+      if (msg.content == this.id + " help") {
+          bot.createMessage(
+            msg.channel.id,
+            flavor_text['mod_help']
+          );
+      } else if (msg.content == this.id + " queue") {
+        // check the queue
         var queue = this.queue_to_string(bow);
         bot.createMessage(msg.channel.id, queue);
-      }
-      // admin actions
-      if (msg.author != bow.host) {
-        return;
-      }
-      if (msg.content == "mr gorbachev, nuke this bitch") {
-        bot.createMessage(msg.channel.id, "nuking this bitch...");
-        cupid.nuke();
+      } else if (msg.content == this.id + " users") {
+        // print users
+        var users_s = "Users:" + User.print();
+        bot.createMessage(msg.channel.id, users_s);
+      } else if (msg.content.includes(this.id + " ban")) {
+        // print users
+        var bits = msg.content.split(" ");
+        var user = User.find_by_id(bits[2]);
+        this.ban(user);
+      } else if (msg.content.includes(bow.delimiter)) {
+        // process letter
+        var bits = msg.content.split(bow.delimiter);
+        var letter_uuid = bow.queue[parseInt(bits[0])];
+        var letter = Letter.find(letter_uuid);
+        var status = bits[1].trim();
+        this.resolve_letter(bow, letter, status);
       }
     });
 
@@ -94,44 +172,74 @@ class Cupid {
 
     bot.connect(); // Get the bot to connect to Discord
 
-    setInterval(()=>{this.poll_letters(this);}, 1 * 1000); // every minute
+    setInterval(() => {
+      this.poll_letters(this);
+    }, this.poll_interval);
   }
   // TODO make the id the thing to watch out for.
-  receive_letter(pseudonym, letter, uuid = null) {
+  receive_letter(pseudonym, text, uuid = null) {
     var user = User.find(uuid);
     if (user == null) {
       user = new User();
       user.init();
     }
-    var letter = new Letter(user, pseudonym, letter);
-    letter.init();
-    user.add_letter(letter);
+    var unprocessed = Letter.find_unprocessed(user);
+    var letter = null;
+
+    if (unprocessed.length <= this.letter_cap) {
+      letter = new Letter(user, pseudonym, text);
+      letter.init();
+      user.add_letter(letter);
+    } else {
+      this.dm(
+        user,
+        "we're sorry, you've reached letter cap!" +
+          " we know you worked hard to write it though, so here's a copy of your letter here:\n" +
+          "to the lovely stranger this letter finds...\n" +
+          text +
+          "\nlove," +
+          pseudonym
+      );
+    }
     return { user: user, letter: letter };
   }
 
   init_user(uuid, code) {
-    var user = User.find(uuid);
+    var user = User.find(uuid, false);
     if (user == null) {
       console.log("No user to init. Error...");
     }
 
     this.exchange_code(code, body => {
       user.add_token(body.access_token);
-      this.add_user_id(user.uuid);
+      this.add_user_id(user);
     });
     return user;
   }
-
+  merge_user(defunct, persistent) {
+    for (var uuid in defunct.letters) {
+      var letter = Letter.find(uuid);
+      letter.reauthor(persistent);
+    }
+    for (var uuid in defunct.deliveries) {
+      var letter = Letter.find(uuid);
+      letter.to(persistent);
+    }
+    defunct.delete();
+  }
   poll_letters(cupid) {
-    // TODO add to bow queue
-    var letters = Letter.find_unprocessed();
-    for (var i in letters) {
-      var letter =letters[i]; 
-      // console.log(letter);
+    var unprocessed_letters = Letter.find_unprocessed();
+    for (var i in unprocessed_letters) {
+      var letter = unprocessed_letters[i];
       cupid.send_letter_to_mods(letter.author, letter);
     }
+    var unsent_letters = Letter.find_unsent();
+    for (var i in unprocessed_letters) {
+      var letter = unprocessed_letters[i];
+      cupid.send_letter(letter);
+    }
   }
-  
+
   send_letter_to_mods(author, letter) {
     //distribute it to a bow
     var bow = Bow.random();
@@ -151,27 +259,80 @@ class Cupid {
     }
   }
 
-  resolve_letter(bow, letter, approve) {
+  resolve_letter(bow, letter, status) {
+    var approve = null;
+    if (
+      status.includes("no") ||
+      status.includes("bad") ||
+      status.includes("false")
+    ) {
+      approve = false;
+    } else if (
+      status.includes("yes") ||
+      status.includes("true") ||
+      status.includes("go")
+    ) {
+      approve = true;
+    }
+    
     if (approve) {
-      var recipient = User.random();
-      letter.approve();
-      letter.to(recipient);
-      recipient.add_delivery(letter);
-    } else {
-      var author = User.find(letter.author_uuid);
+      bow.remove_letter(letter);
+    } else if (approve == false) {
+      var author = User.find(letter.author);
       this.dm(
         author,
         "the cupids have deemed your letter unfit for their standards, and urge you to try again. sorry :("
       );
+      this.bot.createMessage(bow.channel.id, "letter rejected. so it goes :^)");
+      bow.remove_letter(letter);
+    } else {
+      var recipient_no = status;
+      var recipient = User.find(recipient_no);
+      if (recipient==null) {
+        recipient = User.find_by_id(recipient_no);
+      }
+      if (recipient!=null) {
+        this.send_letter(letter, recipient);
+        return;
+      }
+      this.bot.createMessage(bow.channel.id, "idk who that is lol. try their uuid or id?");
+      
     }
-    bow.remove_letter(letter);
   }
-  
-  queue_to_string(bow){
+  send_letter(letter, recipient = null) {
+    if (recipient == null) recipient = User.random();
+    if (recipient == null || letter.author == recipient.uuid) {
+      return;
+    }
+    letter.approve();
+    letter.to(recipient);
+    recipient.add_delivery(letter);
+    this.bot.createMessage(bow.channel.id, "letter en route !");
+  }
+
+  print_letters(user) {
+    var result = "Letters from you:";
+    for (var uuid in user.letters) {
+      var letter = Letter.find(uuid);
+      var to = "";
+      if (letter.recipient != null) {
+        to += "to: " + user.letters[uuid];
+      }
+      result += "\nfrom:" + letter.pseudonym + "\n" + to + letter.text + "\n";
+    }
+    var result = "Letters addressed to you:";
+    for (var uuid in user.deliveries) {
+      var letter = Letter.find(uuid);
+      result += "\nfrom:" + letter.pseudonym + "\n" + letter.text + "\n";
+    }
+    return result;
+  }
+
+  queue_to_string(bow) {
     var queue = "Queue:";
     for (var i in bow.queue) {
       var letter = Letter.find(bow.queue[i]);
-      queue+="\n  - "+letter.pseudonym + " said " + letter.text;
+      queue += `\n   ${i}. ${letter.pseudonym} said ${letter.text}`;
     }
     return queue;
   }
@@ -191,7 +352,7 @@ class Cupid {
     }
     user.delete();
   }
-  
+
   quit_bow(bow) {
     bow.delete();
   }
@@ -205,21 +366,22 @@ class Cupid {
     letter.burn();
   }
 
-  dump_db() {
+  dump_db(str = false) {
+    if (str) {
+      var users = User.print();
+      var bows = Bow.print();
+      var letters = Letter.print();
+      return "users:" + users + "\nbows:" + bows + "\nletters:" + letters;
+    }
     var users = User.all();
     var bows = Bow.all();
     var letters = Letter.all();
     return { users: users, bows: bows, letters: letters };
   }
-
-  nuke_users() {
-    User.nuke();
+  ban(user) {
+    this.unsubscribe(user);
+    //todo: ip ban too lol
   }
-
-  nuke_bows() {
-    Bow.nuke();
-  }
-
   nuke() {
     User.nuke();
     Bow.nuke();
@@ -262,9 +424,8 @@ class Cupid {
     );
   }
 
-  add_user_id(uuid) {
+  add_user_id(user) {
     var cupid = this;
-    var user = User.find(uuid);
     var options = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -277,14 +438,16 @@ class Cupid {
       response
     ) {
       if (!error && response.statusCode == 200) {
-        user.add_id(response.body.id);
-        user.add_username(
-          response.body.username + "#" + response.body.discriminator
-        );
-        cupid.dm(
-          user,
-          "please wait! cupids are processing your request now ^_^"
-        );
+        var query_user = User.find_by_id(response.body.id);
+        if (query_user != null) {
+          this.merge_users(user, query_user);
+        } else {
+          user.add_id(response.body.id);
+          user.add_username(
+            response.body.username + "#" + response.body.discriminator
+          );
+        }
+        cupid.dm(user, "please wait! your letter is in the cupids queue ^_^");
         return response.body.id;
       } else {
         console.log(response.body);

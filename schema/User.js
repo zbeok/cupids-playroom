@@ -1,6 +1,7 @@
 var uuid = require("uuid");
 var DataBase = require("../database.js");
 var db = new DataBase();
+var randomWords = require('random-words');
 
 class User {
   constructor () {
@@ -12,48 +13,15 @@ class User {
     this.uuid = uuid.v4();
   }
   
-  static reconstruct(obj) {
-    var empty = new User();
-    return Object.assign(empty, obj);
-  }
-  
-  static find(uuid) {
-    if (uuid==null) {
-      return null;
-    }
-    var user = db.get('users',{uuid:uuid});
-    if (user==null) {
-      return null;
-    }
-    user = User.reconstruct(user);
-    return user;
-  }
-  static find_id(id) {
-    var user = db.get('users',{id:id});
-    if (user==null) {
-      return null;
-    }
-    user = User.reconstruct(user);
-    return user;
-  }
-  
-  static random() {    
-    var users = db.all('users');
-    if (users==null) {
-      return null;
-    }
-    
-    const i = Math.floor(Math.random() * db.size());
-    return user[i];
-  }
-  
+// public functions ========================================================
+
   add_delivery(letter){
-    this.delivery[letter.uuid] = letter.text;
+    this.deliveries[letter.uuid] = letter.nick;
     this.save();
   }
   
   add_letter(letter){
-    this.letters[letter.uuid] = letter.text;
+    this.letters[letter.uuid] = letter.nick;
     this.save();
   }
   
@@ -106,9 +74,63 @@ class User {
     return item;
   }
   
+// private functions =======================================================
+  
+  static reconstruct(obj) {
+    var empty = new User();
+    return Object.assign(empty, obj);
+  }
+  
+  static find(uuid,id_check=true) {
+    if (uuid==null) {
+      return null;
+    }
+    var user = db.get('users',{uuid:uuid});
+    if (user==null || (id_check==true && user.id==null)) {
+      return null;
+    }
+    user = User.reconstruct(user);
+    return user;
+  }
+  
+  static find_id(id) {
+    var user = db.get('users',{id:id});
+    if (user==null || id==null || user.id==null) {
+      return null;
+    }
+    user = User.reconstruct(user);
+    return user;
+  }
+  
+  static random() {    
+    var users = db.all('users');
+    if (users==null) {
+      return null;
+    }
+    const i = Math.floor(Math.random() * db.size());
+    var user = User.reconstruct(users[i]);
+    if ( user.id==null) return;
+    return user;
+  }
+  
   static all() {
     var users = db.all('users');
     return users;
+  }
+  
+  static print(verbose = false,all=false) {
+    var users = db.all('users');
+    var result = ""
+    for (var i in users){
+      var user = users[i];
+      var user_str = user.id;
+      if (verbose) user_str = JSON.stringify(user);
+      result+="\n- "+ user_str;
+      if (!all && result.length>200){
+        return result;
+      }
+    }
+    return result;
   }
   
   static nuke() {

@@ -2,22 +2,15 @@ const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
 
 class DataBase {
-  constructor() {
-    const adapter = new FileSync(".data/db.json",{
-      defaultValue: { bows: [], users: [], letters: [] }
+  constructor(path=".data/db.json",default_value=null) {
+    if (default_value==null) {
+      default_value={ bows: [], users: [], letters: [] }
+    }
+    const adapter = new FileSync(path,{
+      defaultValue: default_value
     });
     this._db = low(adapter);
-    // this._db.defaults().write();
     this._db.read();
-  }
-  
-  new(category, data) {
-    var item = this._db
-      .get(category)
-      .push(data)
-      .write();
-    if (item == null) return null;
-    return item[0];
   }
 
   get(category, data) {
@@ -46,6 +39,23 @@ class DataBase {
       .value();
     return list;
   }
+  
+  size(category) {
+    var length = this._db.get(category)
+      .size()
+      .value();
+    return length;
+  }
+  
+  new(category, data) {
+    this._db.read();
+    var item = this._db
+      .get(category)
+      .push(data)
+      .write();
+    if (item == null) return null;
+    return item[0];
+  }
 
   update(category, criteria, data) {
     this._db.read();
@@ -63,13 +73,6 @@ class DataBase {
       .get(category)
       .remove(criteria)
       .write();
-  }
-  
-  size(category) {
-    var length = this._db.get(category)
-      .size()
-      .value();
-    return length;
   }
   
   nuke(category) {

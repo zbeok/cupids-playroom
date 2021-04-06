@@ -1,0 +1,14 @@
+
+# MOD GUIDE
+- cupidbot queue 
+  - see letters in queue
+- < queue # > | < yes/no >
+  - approve or disapprove of letter
+  - todo: reaction option?
+- cupidbot users
+  - list of users (first 500 characters)
+- cupidbot bye < user > 
+  - unsubscribe user from cupids playroom lol
+  - TODO ipban user 
+  
+as always ping snerkflerks#9048 for additional questions!

@@ -80,6 +80,21 @@ class Bow {
     return bows;
   }
   
+  static print(verbose=false,all=false) {
+    var bows = db.all('bows');
+    var result = ""
+    for (var i in bows){
+      var bow = bows[i];
+      var bow_str = bow.guild;
+      if (verbose) bow_str = JSON.stringify(bow);
+      result+="\n- "+ bow_str;
+      if (!all && result.length>200){
+        return result;
+      }
+    }
+    return result;
+  }
+  
   static nuke() {
     db.nuke('bows');
   }
