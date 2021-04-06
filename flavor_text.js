@@ -2,8 +2,8 @@ const fs = require("fs");
 
 
 var flavor_text = {
-  "mod_help": read_file("./txt/mod_guide.txt"),
-  "user_help": read_file("./txt/user_guide.txt")
+  "mod_help": read_file("./txt/mod_guide.md"),
+  "user_help": read_file("./txt/user_guide.md")
 };
 
 function read_file(filename) {

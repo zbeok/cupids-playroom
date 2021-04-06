@@ -7,7 +7,7 @@ var methodOverride = require("method-override");
 const Eris = require("eris");
 const Cupid = require("./Cupid");
 const ipfilter = require('express-ipfilter').IpFilter;
-const Validator = require("./validation");
+// const Validator = require("./validation");
 
 // vars ====================================================
 

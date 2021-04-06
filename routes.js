@@ -35,9 +35,9 @@ module.exports = function(app, cupid) {
   
   // DEBUG FUNCTIONS (disable on beta) =====================
   
-  app.get("/all", function(req, res) {
-    res.status(200).send(cupid.dump_db());
-  });
+//   app.get("/all", function(req, res) {
+//     res.status(200).send(cupid.dump_db());
+//   });
   
   // frontend routes =========================================================
 

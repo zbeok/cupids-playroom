@@ -58,8 +58,7 @@ class Cupid {
         if (user == null) {
           bot.createMessage(
             msg.channel.id,
-            "hello! i don't recognize you, have we met? Introduce yourself to me at https://cupids-playroom.glitch.me/ ! " +
-              "if this is an error please let my developer know at snerkflerks#9048! "
+            flavor_text['user_help']
           );
           return;
         } else if (msg.content == "goodbye sweet angels") {
@@ -116,7 +115,7 @@ class Cupid {
             msg.channel.id,
             "hello angels! your workspace is setup for matchmaking!"
           );
-        } else if (msg.content.includes("cupid")) {
+        } else if (msg.content.includes("cupidbot")) {
           bot.createMessage(
             msg.channel.id,
             "hello i'm cupid! i noticed that i'm here but you didn't wake me up. try typing ||awaken, my love|| to begin!"
@@ -314,16 +313,14 @@ class Cupid {
     var result = "Letters from you:";
     for (var uuid in user.letters) {
       var letter = Letter.find(uuid);
-      var to = "";
-      if (letter.recipient != null) {
-        to += "to: " + user.letters[uuid];
-      }
-      result += "\nfrom:" + letter.pseudonym + "\n" + to + letter.text + "\n";
+      var to = (letter.recipient != null) ? "to: " : "to (temporary name): ";
+      result += "\nfrom:" + letter.pseudonym + "\n" + to +letter.nick+"\n"+ letter.text + "\n";
     }
     var result = "Letters addressed to you:";
     for (var uuid in user.deliveries) {
       var letter = Letter.find(uuid);
-      result += "\nfrom:" + letter.pseudonym + "\n" + letter.text + "\n";
+      var to = "to (your anonymous name): ";
+      result += "\nfrom:" + letter.pseudonym + "\n" + to +letter.nick+"\n"+ letter.text + "\n";
     }
     return result;
   }
