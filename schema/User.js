@@ -62,6 +62,14 @@ class User {
     return new_user;
   }
   
+  random() {
+    var user = User.random();
+    while(this!=null && user.id==this.id) {
+      user = User.random();
+    }
+    return user;
+  }
+  
   save(){
     var item = db.update('users',{uuid:this.uuid},this);
     item = User.reconstruct(this);
@@ -107,7 +115,7 @@ class User {
     if (users==null) {
       return null;
     }
-    const i = Math.floor(Math.random() * db.size());
+    const i = Math.floor(Math.random() * db.size('users'));
     var user = User.reconstruct(users[i]);
     if ( user.id==null) return;
     return user;

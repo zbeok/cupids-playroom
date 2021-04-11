@@ -1,5 +1,6 @@
 var uuid = require("uuid");
 var DataBase = require("../database.js");
+var randomWords = require('random-words');
 var db = new DataBase();
 
 class Letter {
@@ -15,6 +16,7 @@ class Letter {
     this.recipient = null;
     this.approved = null;
     this.bow = null;
+    this.sent = false;
     this.uuid = uuid.v4();
   }
 
@@ -33,6 +35,10 @@ class Letter {
 
   burn() {
     this.recipient = null;
+    this.save();
+  }
+  mark_sent(){
+    this.sent=true;
     this.save();
   }
 
@@ -94,12 +100,11 @@ class Letter {
     return letters;
   }
   static find_unsent() {
-    var criteria = { approved: true, recipient: null };
+    var criteria = { approved: true,sent:false };
     var letters_raw = db.get_all("letters", criteria);
     var letters = [];
     for (var i in letters_raw) {
       var letter = Letter.reconstruct(letters_raw[i]);
-
       letters.push(letter);
     }
     return letters;
@@ -122,7 +127,7 @@ class Letter {
   static find_by_nicks(user, nick) {
     var letter = db.get("letters", { author: user.uuid, nick: nick });
     if (letter == null) {
-      letter = db.get("letters", { recipient: user.uuid, pseud: nick });
+      letter = db.get("letters", { recipient: user.uuid, pseudonym: nick });
       if (letter == null) {
         return null;
       }

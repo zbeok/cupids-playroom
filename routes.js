@@ -17,7 +17,6 @@ module.exports = function(app, cupid) {
   //put/posts
   app.post("/api/mailbox", function(req, res) {
     var result = cupid.receive_letter(req.body.pseudonym,req.body.letter,req.body.uuid);
-    console.log(result);
     if (result['letter']==null) {
       res.status(400).send({"error":"you've reached the active letter cap. thank you for playing! "+
                             "a copy of this letter will be sent to your discord, so don't worry if you worked too hard on it."});
@@ -35,9 +34,9 @@ module.exports = function(app, cupid) {
   
   // DEBUG FUNCTIONS (disable on beta) =====================
   
-//   app.get("/all", function(req, res) {
-//     res.status(200).send(cupid.dump_db());
-//   });
+  app.get("/all", function(req, res) {
+    res.status(200).send(cupid.dump_db());
+  });
   
   // frontend routes =========================================================
 

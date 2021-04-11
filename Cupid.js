@@ -14,7 +14,7 @@ class Cupid {
     this.bot = bot;
     this.id = "cupidbot";
     this.poll_interval = 20 * 1000;
-    this.letter_cap = 2;
+    this.letter_cap = 10;
 
     // bot =========================================
 
@@ -95,6 +95,8 @@ class Cupid {
           var nick = bits[0];
           var text = msg.content.slice(2 + nick.length);
           var letter = Letter.find_by_nicks(user, nick);
+          console.log(user,nick);
+          if (letter==null) return;
           var anon_uuid =
             letter.author == user.uuid ? letter.recipient : letter.author;
           var anon = User.find(anon_uuid);
@@ -107,7 +109,6 @@ class Cupid {
       //new bow if needed
       var bow = Bow.find(msg.guildID);
       if (bow == null) {
-        console.log("mod action");
         if (msg.content == "awaken, my love") {
           var bow = new Bow(msg);
           bow.init();
@@ -133,6 +134,7 @@ class Cupid {
           );
       } else if (msg.content == this.id + " queue") {
         // check the queue
+        
         var queue = this.queue_to_string(bow);
         bot.createMessage(msg.channel.id, queue);
       } else if (msg.content == this.id + " users") {
@@ -152,6 +154,8 @@ class Cupid {
         var status = bits[1].trim();
         this.resolve_letter(bow, letter, status);
       }
+        this.poll_letters(this);
+      
     });
 
     bot.on("typingStart", channel => {
@@ -233,8 +237,8 @@ class Cupid {
       cupid.send_letter_to_mods(letter.author, letter);
     }
     var unsent_letters = Letter.find_unsent();
-    for (var i in unprocessed_letters) {
-      var letter = unprocessed_letters[i];
+    for (var i in unsent_letters) {
+      var letter = unsent_letters[i];
       cupid.send_letter(letter);
     }
   }
@@ -242,10 +246,15 @@ class Cupid {
   send_letter_to_mods(author, letter) {
     //distribute it to a bow
     var bow = Bow.random();
-    if (bow == null) {
+    if (bow == null ) {
       return;
     } else {
       //find user responsible
+      var user = User.find(author);
+      if ( user==null || (user !=null && user.id==null)) {
+        console.log(user);
+        return;
+      }
       letter.claim(bow);
       bow.add_letter(letter);
       this.bot.createMessage(
@@ -255,10 +264,12 @@ class Cupid {
           " sends:\n" +
           letter.text
       );
+      this.dm(user, "please wait! your letter is in the cupids queue as we speak. <3 ");
     }
   }
 
   resolve_letter(bow, letter, status) {
+    
     var approve = null;
     if (
       status.includes("no") ||
@@ -274,39 +285,60 @@ class Cupid {
       approve = true;
     }
     
+    var author = User.find(letter.author);
+    if (author==null) return;
+    
     if (approve) {
+      recipient = author.random();
+      if (recipient == null) {
+        return;
+      }
+      letter.approve();
+      letter.to(recipient);
+      this.bot.createMessage(bow.channel.id, "letter posted to queue!! thank you <3");
       bow.remove_letter(letter);
     } else if (approve == false) {
-      var author = User.find(letter.author);
       this.dm(
         author,
         "the cupids have deemed your letter unfit for their standards, and urge you to try again. sorry :("
       );
       this.bot.createMessage(bow.channel.id, "letter rejected. so it goes :^)");
+      letter.mark_sent();
+      letter.approve(false);
       bow.remove_letter(letter);
     } else {
-      var recipient_no = status;
-      var recipient = User.find(recipient_no);
+      var recipient_num = status;
+      var recipient = User.find(recipient_num);
       if (recipient==null) {
-        recipient = User.find_by_id(recipient_no);
+        recipient = User.find_by_id(recipient_num);
       }
       if (recipient!=null) {
-        this.send_letter(letter, recipient);
+        letter.approve();
+        letter.to(recipient);
+        this.bot.createMessage(bow.channel.id, "letter posted to queue!! thank you <3");
         return;
       }
       this.bot.createMessage(bow.channel.id, "idk who that is lol. try their uuid or id?");
       
     }
   }
-  send_letter(letter, recipient = null) {
-    if (recipient == null) recipient = User.random();
-    if (recipient == null || letter.author == recipient.uuid) {
-      return;
-    }
-    letter.approve();
-    letter.to(recipient);
+  
+  
+  send_letter(letter) {
+    var recipient = User.find(letter.recipient);
+    var author = User.find(letter.author);
+    if (recipient==null) return;
     recipient.add_delivery(letter);
+    var bow = Bow.find(letter.bow);
     this.bot.createMessage(bow.channel.id, "letter en route !");
+    letter.mark_sent();
+    this.dm(recipient,
+            "You've got mail from a mysterious stranger! \n From: "+letter.pseudonym +":\n"+
+            letter.text
+           );
+    this.dm(author,
+            "Your letter was sent, congrats!! It went to: "+letter.nick +". I hope something beautiful happens!"
+           );
   }
 
   print_letters(user) {
@@ -435,16 +467,16 @@ class Cupid {
       response
     ) {
       if (!error && response.statusCode == 200) {
-        var query_user = User.find_by_id(response.body.id);
+        var query_user = User.find_id(response.body.id);
         if (query_user != null) {
-          this.merge_users(user, query_user);
+          cupid.merge_user(user, query_user);
         } else {
           user.add_id(response.body.id);
           user.add_username(
             response.body.username + "#" + response.body.discriminator
           );
         }
-        cupid.dm(user, "please wait! your letter is in the cupids queue ^_^");
+        cupid.dm(user, "welcome 2 our playroom! ask for help via `cupidbot help`! ^_^");
         return response.body.id;
       } else {
         console.log(response.body);

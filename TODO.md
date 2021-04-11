@@ -3,6 +3,10 @@
 - about page nice
 - prettify flavor text
 - ip blocking procedure
+- user should b able to change nick 
+- error handling should be informative to users
+- unit tests
+- split up resolve letter
 - (low priority) change mod recipient by uuid
 
 # BUGS
