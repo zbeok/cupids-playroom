@@ -11,4 +11,5 @@ this is barely tested and violently buggy, but
   ~~- TODO ipban user~~
 - `cupidbot help` help message
   
+note: as this is a small app, it may sometimes be down! check the webapp for status updates. 
 as always ping snerkflerks#9048 for additional questions!

@@ -1,234 +1,243 @@
-html{
-  margin:0;
-  overflow:hidden;
-  background-color:#000;
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-image:url('https://cdn.glitch.com/10d4c252-4224-4431-b43b-176c2b3ac571%2Fvelvet.jpeg?v=1588804742535');
+@import url("https://fonts.googleapis.com/css2?family=Seaweed+Script&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica:ital@0;1&display=swap');
+
+html {
+  margin: 0;
+  overflow: hidden;
+  background-color: #000;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-image: url("https://cdn.glitch.com/10d4c252-4224-4431-b43b-176c2b3ac571%2Fvelvet.jpeg?v=1588804742535");
   background-attachment: fixed;
 }
 body {
-  margin:0;
-  font-family:"Times New Roman", serif;
-  background-color:rgba(0,0,0,0.6);
-  background-image:url("https://i.gifer.com/origin/b1/b195bd28939ffec5324c85eacd9e5196_w200.gif");
+  margin: 0;
+  font-family: "Times New Roman", serif;
+  background-color: rgba(0, 0, 0, 0.6);
+  background-image: url("https://cdn.glitch.com/eabaafb5-36aa-4a6a-ade1-0c75c95ce98d%2Fwhite_sparkles.gif?v=1618351752666");
   background-attachment: fixed;
   display: flex;
   align-items: center;
+  font-family: 'IM Fell DW Pica', serif;
   justify-content: center;
 }
 form {
-  padding:0;margin:0;
-  padding-top:10px;
+  padding: 0;
+  margin: 0;
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 label {
-  color:#aaa;
-  font-size:24px;
+  color: #aaa;
+  font-size: 24px;
 }
-input{
-  background-color:rgba(255,255,255,0.3);
-  color:#fff;
-  padding:0 10px;
-  border-color:#323;
-  font-size:24px;
-  text-align:center;
-  font-family:"Times New Roman", serif;
+input {
+  background-color: rgba(255, 255, 255, 0);
+  color: #fff;
+  padding: 0 10px;
+  border-color: #323;
+  font-size: 24px;
+  text-align: center;
+  border:none;
+  border-bottom: 1px dotted #555;
+  width:80%;
+  font-family: 'IM Fell DW Pica', serif;
 }
 
-::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: white;
-  opacity: .1; /* Firefox */
+input,button,textarea:focus {
+  outline:none;
 }
-g {
-  margin:0;padding:0;
-  color:#ff00ff;
-  text-decoration:bold;
-  font-size:30px;
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: white;
+  opacity: 0.1; /* Firefox */
 }
 p {
-  color:#aaaaff;
-  margin:0;padding:0;
+  color: #aaaaff;
+  margin: 0;
+  padding: 0;
 }
-
 
 h1 {
-  margin:0;padding:0;
-  color:#ffaaff;
-/*   opacity:0; */
-  text-decoration:bold;
-  font-size:8vmax;
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  /*   opacity:0; */
+  font-size: 80px;
 }
-
 
 #content {
-  margin-top:20px;
-  width:50vw;
-  min-width:300px;
-  background-color:rgba(0,0,0,.4);
-  border:1px dotted #555;
-  padding:30px;
+  margin-top: 30px;
+  width: 50vw;
+  min-width: 250px;
+  min-height:100px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px dotted #555;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .btn-primary {
-  margin:10px 50px;
-  padding:5px;
-  background-color:#221122;
-  border-color:#323;
-  font-family:"Times New Roman", serif;
-  color:white;
+  margin: 10px 50px 0 50px;
+  padding: 5px;
+  background-color: #221122;
+  font-family: 'IM Fell DW Pica', serif;
+  border-color: #323;
+  color: white;
+  -webkit-transition: .3s all ease;
+  -moz-transition:.3s all ease;
+  -o-transition:.3s all ease;
+  transition: .3s all ease;
 }
-.btn-primary:hover{
-  border-color:#646;
-  background-color:#332233;
+.btn-primary:hover {
+  border-color: #646;
+  background-color: #332233;
 }
 
 #letterspace {
-  font-family:"Times New Roman", serif;
-  overflow:scroll;
+  overflow: auto;
   scrollbar-color: grey transparent;
-  scrollbar-width:thin;
-  border:1px dotted #555;
-  min-height:50vh;
-  width:100%;
-  border-radius:5px;
-  background-color:rgba(0,0,0,.5);
+  scrollbar-width: thin;
+  border: 1px dotted #555;
+  min-height: 50vh;
+  width: 100%;  
+  font-family: 'IM Fell DW Pica', serif;
+  background-color: rgba(0, 0, 0, 0.5);
   -webkit-overflow-scrolling: touch;
-  color:white;
-  padding:10px;
-  font-size:18px;
-  margin:0;
+  caret-color: rgba(255,255, 255, .3);
+  letter-spacing: 1px;
+  color: white;
+  padding: 10px;
+  font-size: 18px;
+  margin: 0;
   resize: none;
 }
-::-webkit-resizer {
-  display: none;
+
+#title {
+  z-index: 100;
+  height: 80px;
+  position: absolute;
+  margin-left: -4vmax;
+  margin-top: -40px;
+  padding: 0;
+  color: #fff;
+/*   color: #141111; */
+  font-family: "Seaweed Script", cursive;
+  white-space: nowrap;
+  filter: drop-shadow(0 0 0.5rem crimson) saturate(1000%) drop-shadow(0 0 0.1rem white) blur(1px);
+  -webkit-transition: .3s filter ease;
+  -moz-transition:.3s filter ease;
+  -o-transition:.3s filter ease;
+  transition: .3s filter ease;
 }
-#spoken{
-  position:absolute;
-  overflow:scroll !important;
-  height:100%;
-  scrollbar-color: grey transparent;
-  scrollbar-width:thin;
-  width:100%;
-  bottom: 0;
-/*   overflow-wrap: break-word; */
-word-break: break-all;
-  z-index:1000;
-  padding:5px;
-  -webkit-overflow-scrolling: touch;
+
+#title:hover {
+  filter: drop-shadow(0 0 0.5rem crimson) saturate(1000%) drop-shadow(0 0 0.1rem white) blur(0px);
 }
-#title{
-  position:absolute;
-  width:100vw;
-  height:80px;
-  left:10vw;
-  margin-top:-9vmax;
-  padding:0;
-  z-index:100;
-}
-#title:hover{
-  opacity:.8;
-}
+
 ::-webkit-scrollbar-thumb:vertical {
-    background: #ffffff;
-    border-radius: 5px;
-    height: auto;}
-   
-::-webkit-scrollbar-thumb:horizontal {
-    background: #ffffff;
-    border-radius: 5px;
-    height: auto;}
-   
+  background: #ffffff;
+/*   border-radius: 5px; */
+  height: auto;
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+  height:0;
+}
+
 ::-webkit-scrollbar {
-    height: 7px;
-    width: 7px;
-    background: rgba(0,0,0,0);
+  height: 5px;
+  width: 5px;
+  background: rgba(0, 0, 0, 0);
 }
 
 /*///////////////// FLOATERS.... ///////////////*/
 
-.floater{
+.floater {
   pointer-events: none;
-  position:absolute;
-  z-index:1;
-/*   top:0; */
+  position: absolute;
+  z-index: 1;
+  /*   top:0; */
 }
-#fluid{
-  height:150vh;
-  z-index:-1;
-  right:-25vw;
-  top:-25vh;
-}
-
-#crystal-ball{
-  z-index:-1;
-  
-  height:70vh;
-  left:-5vw;
-  bottom:1vh;
+#fluid {
+  height: 150vh;
+  z-index: -1;
+  right: -25vw;
+  top: -25vh;
 }
 
-#pink-rose{
-  z-index:-1;
-  height:300px;
-  left:20vw;
-  top:3vh;
+#crystal-ball {
+  z-index: -1;
+
+  height: 70vh;
+  left: -5vw;
+  bottom: 1vh;
 }
 
-#eyeball{
-  height:100px;
-  right:5vw;
-  z-index:-1;
-  top:25vh;
+#pink-rose {
+  z-index: -1;
+  height: 300px;
+  left: 20vw;
+  top: 3vh;
 }
 
-#candle{
-  height:200px;
-  right:10vw;
-  z-index:-1;
-  bottom:20vh;
-} 
+#eyeball {
+  height: 100px;
+  right: 5vw;
+  z-index: -1;
+  top: 25vh;
+}
+
+#candle {
+  height: 200px;
+  right: 10vw;
+  z-index: -1;
+  bottom: 20vh;
+}
 
 /*///////////////// resize problems.... ///////////////*/
 
-@media only screen and (max-width: 500px) {
-  .floater {
-    opacity:0;
+/* @media only screen and (max-width: 900px) and (min-width:551px) {
+  #title h1{
+    font-size: 10vmax;
   }
-}
+} */
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 750px) {
   .floater {
-    opacity:0;
+    opacity: 0;
   }
-  body{
-    padding-top:100px;
+  body {
+    /*     padding-top:100px; */
   }
-  .container{
-    position:absolute;
-    margin:0;padding:0px;
+  #title h1 {
+    font-size: 68px;
+    white-space: normal;
+    line-height: 32px;
+    text-indent: -38px;
+    padding-left:42px;
   }
-  #title{
-    height:40px !important;
+  #title {
+    /*     position:static; */
     margin:0;
+    max-width:200px;
+    left: auto;
+/*     margin-top: -1px; */
   }
-  .jumbotron{
-    margin:5px;
-    padding:5px;
+  #content {
+    margin-top: 60px;
   }
-  #spoken-container {
-  margin:0px;
-    height:50vh;
+  input {
+    width: 100%;
   }
-  input{
-    width:100%;  
-  }
-  label{
-    margin:0;
-  }
-  #button{
-    padding:0 10px;
+  label {
+    margin: 0;
   }
 }

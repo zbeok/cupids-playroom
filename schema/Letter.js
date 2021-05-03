@@ -32,7 +32,9 @@ class Letter {
     this.author = user.uuid;
     this.save();
   }
-
+  renick(new_nick){
+    this.nick = new_nick;
+  }
   burn() {
     this.recipient = null;
     this.save();

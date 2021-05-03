@@ -1,54 +1,15 @@
-html{
-  height:100vh;
-  overflow:hidden;
-  background-color:#000;
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-image:url('https://cdn.glitch.com/10d4c252-4224-4431-b43b-176c2b3ac571%2Fvelvet.jpeg?v=1588804742535');
-}
-body {
-/*   position:absolute; */
-  height:200vh;
-  margin-top:-100px;
-  padding-top:25vh;
-  font-family:"Times New Roman", serif;
-  background-color:rgba(0,0,0,0.6);
-  background-image:url("https://i.gifer.com/origin/b1/b195bd28939ffec5324c85eacd9e5196_w200.gif");
-}
-.jumbotron {
-  background-color:rgba(0,0,0,.4);
-  border:1px dotted #555;
-  padding-bottom:30px;
-}
-p {
-  color:#fff;
-  margin:0;padding:0;
+#content {
+  margin-top:30px;
+  padding:40px;
 }
 
-h1 {
-  margin:0;padding:0;
-  color:#ffaaff;
-  text-decoration:bold;
-  font-size:50px;
-}
-
-.btn-primary {
-  margin:10px 50px;
-  padding:0 50px;
-  background-color:#221122;
-  border-color:#323;
-}
-.btn-primary:hover{
-  border-color:#646;
-  background-color:#332233;
-}
 
 /*///////////////// resize problems.... ///////////////*/
 
 
 @media only screen and (max-width: 500px) {
 
-  body{
+/*   body{
     padding-top:100px;
   }
   .container{
@@ -58,5 +19,5 @@ h1 {
   .jumbotron{
     margin:5px;
     padding:5px;
-  }
+  } */
 }

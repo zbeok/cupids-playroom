@@ -8,7 +8,8 @@ hello! welcome to the world of cupidzzz!
 - `cupidbot bye < nick >` cut off rando
 - `cupidbot delete < nick >` delete letter (specifically one that's been approved ahaha)
 - `cupidbot help` this help message
-
+ 
+note: as this is a small app, it may sometimes be down! check the webapp for status updates. 
 as always ping snerkflerks#9048 for additional questions, and especially if this is an error!
 
   

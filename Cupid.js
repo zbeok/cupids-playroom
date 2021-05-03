@@ -71,7 +71,7 @@ class Cupid {
         } else if (msg.content == this.id + " letters") {
           this.dm(
             user,
-            "here are the letters you've been involved with so far:" +
+            "here are the letters you've been involved with so far:\n" +
               this.print_letters(user)
           );
         } else if (msg.content.includes(this.id + " bye ")) {
@@ -179,6 +179,7 @@ class Cupid {
       this.poll_letters(this);
     }, this.poll_interval);
   }
+  
   // TODO make the id the thing to watch out for.
   receive_letter(pseudonym, text, uuid = null) {
     var user = User.find(uuid);
@@ -219,6 +220,7 @@ class Cupid {
     });
     return user;
   }
+  
   merge_user(defunct, persistent) {
     for (var uuid in defunct.letters) {
       var letter = Letter.find(uuid);
@@ -230,6 +232,7 @@ class Cupid {
     }
     defunct.delete();
   }
+  
   poll_letters(cupid) {
     var unprocessed_letters = Letter.find_unprocessed();
     for (var i in unprocessed_letters) {
@@ -348,7 +351,7 @@ class Cupid {
       var to = (letter.recipient != null) ? "to: " : "to (temporary name): ";
       result += "\nfrom:" + letter.pseudonym + "\n" + to +letter.nick+"\n"+ letter.text + "\n";
     }
-    var result = "Letters addressed to you:";
+    result += "\nLetters addressed to you:";
     for (var uuid in user.deliveries) {
       var letter = Letter.find(uuid);
       var to = "to (your anonymous name): ";
@@ -407,10 +410,12 @@ class Cupid {
     var letters = Letter.all();
     return { users: users, bows: bows, letters: letters };
   }
+  
   ban(user) {
     this.unsubscribe(user);
     //todo: ip ban too lol
   }
+  
   nuke() {
     User.nuke();
     Bow.nuke();
@@ -475,8 +480,8 @@ class Cupid {
           user.add_username(
             response.body.username + "#" + response.body.discriminator
           );
+          cupid.dm(user, "welcome 2 our playroom! ask for help via `cupidbot help`! ^_^");
         }
-        cupid.dm(user, "welcome 2 our playroom! ask for help via `cupidbot help`! ^_^");
         return response.body.id;
       } else {
         console.log(response.body);

@@ -1,9 +1,10 @@
 # TODOS
 - prettify front page
-- about page nice
+- about page nice (better linking visibility)
 - prettify flavor text
 - ip blocking procedure
 - user should b able to change nick 
+- pretty print help and interface text (new internal lib?)
 - error handling should be informative to users
 - unit tests
 - split up resolve letter
